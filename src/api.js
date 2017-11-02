@@ -15,7 +15,7 @@ export const fetchData = (periodId) => {
         'dimension=dx:FbKK4ofIv5R',
         `dimension=pe:${periodId}`,
         //'dimension=ou:ImspTQPwCqd',
-        'includeNumDen=true'
+        //'includeNumDen=true'
     ].join('&');
 
     // events
