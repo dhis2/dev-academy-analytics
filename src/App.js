@@ -1,84 +1,105 @@
-import React from 'react';
-import { connect } from 'react-redux';
-import PropTypes from 'prop-types';
-import { getData } from './actions';
-import './App.css';
+import React, { Component } from 'react';
 
-let selectedValue = null;
+const reportTablePlugin = global.reportTablePlugin;
+const chartPlugin = global.chartPlugin;
 
-const Selector = ({ onClick }) => {
-    const clickHandler = (e) => {
-        if (e.target.value !== selectedValue) {
-            onClick(e.target.value);
-            selectedValue = e.target.value;
-        }
-    };
+const url = 'http://localhost:8080';
+const username = 'admin';
+const password = 'district';
 
-    return (
-        <section>
-            <select onClick={clickHandler} defaultValue="">
-                <option hidden value="">Select period</option>
-                <option value="2017">Fixed: 2017</option>
-                <option value="201701">Fixed: January 2017</option>
-                <option value="201701;201702;201703">Fixed: January, February, March 2017</option>
-                <option value="2017Q3">Fixed: 3rd quarter 2017</option>
-                <option value="LAST_12_MONTHS">Relative: Last 12 months</option>
-                <option value="LAST_4_QUARTERS">Relative: Last 4 quarters</option>
-                <option value="LAST_YEAR">Relative: Last year</option>
-            </select>
-        </section>
-    );
-};
+class App extends Component {
+    constructor() {
+        super();
 
-const ValueTable = ({ data, isLoading }) => {
-    if (!data) {
-        return 'No values here';
+        this.state = {
+            table: 'C0rhAq1oklh',
+            chart: 'LW0O27b7TdD'
+        };
+
+        this.runPlugin = this.runPlugin.bind(this);
+        this.handleClick = this.handleClick.bind(this);
     }
+    runPlugin() {
+        reportTablePlugin.load({
+            id: this.state.table,
+            el: 'table1'
+        });
 
-    if (isLoading) {
-        return 'Loading...';
+        reportTablePlugin.load({
+            columns: [
+                {
+                    dimension: 'dx',
+                    items: [
+                        {
+                            id: 'Uvn6LCg7dVU'
+                        }
+                    ]
+                }
+            ],
+            rows: [
+                {
+                    dimension: 'pe',
+                    items: [
+                        {
+                            id: 'LAST_12_MONTHS'
+                        }
+                    ]
+                }
+            ],
+            el: 'table2'
+        });
+
+        chartPlugin.load({
+            id: this.state.chart,
+            el: 'chart1'
+        });
     }
+    handleClick(e) {
+        this.setState({
+            table: 'KJFbpIymTAo',
+            chart: 'Tun9tJb3sQt'
+        });
+    }
+    componentDidMount() {
+        reportTablePlugin.url = url;
+        reportTablePlugin.username = username;
+        reportTablePlugin.password = password;
 
-    const { headers, metaData, rows } = data;
+        chartPlugin.url = url;
+        chartPlugin.username = username;
+        chartPlugin.password = password;
 
-    return (
-        <section>
-            <table>
-                <thead>
-                <tr>
-                    {headers.map((header, index) => <th key={index}>{header.column}</th>)}
-                </tr>
-                </thead>
-                <tbody>
-                {rows.map((row, index) =>
-                    <tr key={index}>{row.map((value, index) => <td key={index}>{(metaData.items[value] || {}).name || value}</td>)}</tr>
-                )}
-                </tbody>
-            </table>
-        </section>
-    );
-};
+        this.runPlugin();
 
-const App = ({ data, isLoading, onClick }) => (
-    <div>
-        <Selector onClick={ onClick } />
-        <ValueTable data={ data } isLoading={ isLoading } />
-    </div>
-);
+//         reportTablePlugin.load();
+        //
+        // chartPlugin.load({
+        //     id: 'DkPKc1EUmC2',
+        //     el: 'chart1'
+        // });
+    }
+    componentDidUpdate() {
+        console.log("did update");
+        this.runPlugin();
+    }
+    render() {
+        return (
+            <div>
+                <h1>My web portal</h1>
+                <button onClick={this.handleClick}>update</button>
+                <section>
+                    <h2>Pivot table by id</h2>
+                    <div id="table1"></div>
+                    <h2>Pivot table by config</h2>
+                    <div id="table2"></div>
+                </section>
+                <section>
+                    <h2>Chart</h2>
+                    <div id="chart1"></div>
+                </section>
+            </div>
+        );
+    }
+}
 
-App.contextTypes = {
-    store: PropTypes.object,
-};
-
-const mapStateToProps = state => ({
-    isLoading: state.isLoading,
-    data: state.data
-});
-
-const mapDispatchToProps = (dispatch, ownProps) => ({
-    onClick: value => value && dispatch(getData(value))
-});
-
-const AppContainer = connect(mapStateToProps, mapDispatchToProps)(App);
-
-export default AppContainer;
+export default App;
